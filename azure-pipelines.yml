@@ -1,0 +1,71 @@
+# ZAS Petroleum API - Azure Pipelines (continuous integration)
+# Runs on every push to main or banathi-backend, and on pull requests into main.
+
+trigger:
+  branches:
+    include:
+      - main
+      - banathi-backend
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+
+  - script: php -v
+    displayName: Show PHP version
+
+  # Fails the build if any PHP file has a syntax error
+  - script: |
+      set -e
+      found=0
+      for f in $(find . -name "*.php" -not -path "./.git/*" -not -path "./vendor/*"); do
+        echo "Checking $f"
+        php -l "$f"
+        found=1
+      done
+      if [ "$found" -eq 0 ]; then
+        echo "No PHP files found"
+        exit 1
+      fi
+    displayName: Check PHP syntax
+
+  # Fails the build if the API file or the database script is missing
+  - script: |
+      set -e
+      test -n "$(find . -name 'index.php' -not -path './.git/*' | head -n 1)" || (echo "index.php is missing" && exit 1)
+      test -n "$(find . -name '*.sql' -not -path './.git/*' | head -n 1)" || (echo "No .sql schema file found" && exit 1)
+      echo "API file and database script found"
+    displayName: Check API and database files exist
+
+  # Packages the repo so the build produces something you can show in the video
+  - script: |
+      mkdir -p $(Build.ArtifactStagingDirectory)
+      zip -r $(Build.ArtifactStagingDirectory)/zas-api.zip . -x ".git/*"
+    displayName: Zip the API files
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish build artifact
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/zas-api.zip'
+      artifact: 'zas-api'
+
+  # OPTIONAL: deploy to Azure App Service from the pipeline.
+  # Only switch this on after you create a service connection in
+  # Project settings > Service connections (Azure Resource Manager).
+  # Replace YOUR-SERVICE-CONNECTION with that connection's name, then remove the # signs.
+  #
+  # - task: AzureWebApp@1
+  #   displayName: Deploy to zas-api-banathi27
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #   inputs:
+  #     azureSubscription: 'YOUR-SERVICE-CONNECTION'
+  #     appType: 'webAppLinux'
+  #     appName: 'zas-api-banathi27'
+  #     package: '$(Build.ArtifactStagingDirectory)/zas-api.zip'
