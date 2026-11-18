@@ -63,6 +63,8 @@ The project follows the DevOps lifecycle: Plan, Code, Build, Test, Release, Depl
 - **Build and Test:** a GitHub Actions workflow builds the app and runs the unit tests on every push.
 - **Release:** work is merged into `main` through reviewed Pull Requests.
 - **Monitor:** lecturer feedback and team retrospectives feed into the next sprint.
+- 
+Azure DevOps: https://dev.azure.com/banathimaholwana/ZAS%20Petroleum%20Vehicle%20Services%20and%20Online%20Booking%20System/_build
 
 ## Submission notes
 
