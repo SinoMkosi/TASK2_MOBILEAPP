@@ -77,4 +77,4 @@ The project follows the DevOps lifecycle: Plan, Code, Build, Test, Release, Depl
 
 ## Demo video
 
-[VIDEO LINK]
+[VIDEO LINK] https://youtube.com/shorts/zLF7-cHIoUw?si=teOWLdEK-6p0QOtI
